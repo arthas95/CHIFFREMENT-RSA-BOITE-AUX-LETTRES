@@ -3,6 +3,11 @@ from Crypto.Cipher import PKCS1_OAEP
 import json, base64
 from datetime import datetime
 from fastapi import FastAPI
+import pyotp
+import asyncio
+
+
+
 # -------- Chargement des clés (fait une seule fois au chargement du module) --------
 
 # fonctionEcritureLecture.py
@@ -70,3 +75,16 @@ def lire_historique(private_key_file, historique_file):
         })
 
     return messages
+
+def validation_totp(code):
+        #TOTP
+    SECRET_TOTP = "GNITM2HC2S5JJMXZOXIRKUG2T24A5OWY"
+    totp = pyotp.TOTP(SECRET_TOTP)
+
+    
+    if totp.verify(code):
+        print("Accès autorisé 🟩")
+        return True
+    else:
+        print("Accès refusé 🟥")
+        return False
