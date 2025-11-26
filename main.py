@@ -92,7 +92,7 @@ async def ajouter_message(payload: Message):
 #  - ATTENTION : pas protégé par TOTP ici
 # =====================================================
 @app.get("/messages")
-async def lire_messages():
+async def lire_messages(otp: str):
     """
     Retourne tous les messages déchiffrés sous forme JSON.
     Exemple de réponse :
@@ -101,6 +101,10 @@ async def lire_messages():
       ...
     ]
     """
+     # On vérifie d'abord le code TOTP fourni en paramètre
+    if not validation_totp(otp):
+        # Si le code est invalide → on renvoie une page 401 HTML
+        return "CODE INVALIDE"
     messages = lire_historique(PRIVATE_KEY_FILE, HISTORIQUE_FILE)
     return messages
 
