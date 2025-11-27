@@ -29,6 +29,17 @@ cipher = PKCS1_OAEP.new(public_key)
 decipher = PKCS1_OAEP.new(private_key)
 
 
+def chiffrer_rsa(data):
+    if isinstance(data, str):
+        data = data.encode("utf-8")
+
+    result = cipher.encrypt(data)
+    return result
+def dechiffrer_rsa(data):
+    result = decipher.decrypt(data)
+    return result.decode("utf-8")
+
+
 # --------------------------------------------------------
 #   ÉCRITURE VIA API (sans input, version propre)
 # --------------------------------------------------------
@@ -88,3 +99,19 @@ def validation_totp(code):
     else:
         print("Accès refusé 🟥")
         return False
+    
+
+def style_messages_discord(messages):
+    """
+    Améliore le rendu Discord : reçoit une liste [{"date":..., "message":...}], donne une chaîne markdown stylée.
+    """
+    if not messages:  # check liste vide
+        return "⚠️ Aucun message à afficher."
+    styled = []
+    for entry in messages:
+        date = entry.get('date', '???')
+        msg = entry.get('message', '')
+        styled.append(f"✉️ **{date}** : {msg}")
+    
+    # Ajoute tout dans le bloc markdown
+    return "``````"
