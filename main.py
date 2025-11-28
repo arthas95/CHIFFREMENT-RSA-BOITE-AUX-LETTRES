@@ -18,7 +18,9 @@ from testAES import (
     stocker_AES,                                   # ajoute des entrées dans msg_aes.json
     lire_messages                                  # lit msg_aes.json et renvoie les messages déchiffrés
 )
-
+import asyncio
+import httpx
+from gold import router
 
 # -----------------------------------------------------
 #  Pydantic model pour TOTP
@@ -38,7 +40,8 @@ class Message(BaseModel):
 #  Instanciation de l'application FastAPI
 # -----------------------------------------------------
 app = FastAPI()
-
+app.include_router(router)
+API_KEY = "goldapi-4uq3smi6sd2q9-io"
 # (les constantes HISTORIQUE_FILE / PRIVATE_KEY_FILE ne sont plus utilisées ici,
 #  tout passe par msg_aes.json dans testAES.py)
 

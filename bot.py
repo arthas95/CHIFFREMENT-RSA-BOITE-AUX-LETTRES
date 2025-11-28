@@ -10,7 +10,7 @@ from fonctionEcritureLecture import (               # Fonctions maison pour la c
 from main import *
 import json
 from testAES import *
-
+import httpx
 
 # ============================================================
 #                   BOT DISCORD CHIFFRÉ
@@ -20,7 +20,7 @@ from testAES import *
 
 import discord
 import requests
-
+from discord.ext import tasks
 # ------------------------------------------------------------
 # CONFIGURATION API
 # ------------------------------------------------------------
@@ -28,7 +28,7 @@ API_URL = "http://127.0.0.1:8000"   # Ton API FastAPI locale
 ROUTE_MESSAGE = "/message"          # POST
 ROUTE_TOTP = "/totp"                # POST
 ROUTE_CONSULTATION = "/messages"    #GET
-
+ROUTE_GOLDS = "/gold/ounce"
 # ------------------------------------------------------------
 # INTENTS DISCORD
 # ------------------------------------------------------------
@@ -45,6 +45,7 @@ async def on_ready():
     print("====================================================")
     print(f"🤖 Bot connecté : {client.user}")
     print("====================================================")
+    envoie_periodique.start()
 
 # ------------------------------------------------------------
 # SURVEILLER LES MESSAGES
@@ -96,6 +97,24 @@ async def on_message(message):
             await message.channel.send("🟥 Code invalide.")
     if message.content.startswith("#ping"):
         await message.channel.send("PONG")
+    if message.content.startswith("#gold"):
+        async with httpx.AsyncClient() as cl:
+            r = await cl.get(API_URL + ROUTE_GOLDS)
+            data = r.json()                     # -> dict Python
+            prix = data["price_ounce_eur"]      # -> 3586.305 (float)
+        await message.channel.send(f"Le prix de l'ounce est actuellement de : {prix}€")
+        await message.channel.send(f"Channel ID : {message.channel.id}")
+        #channel_ID 1439642469330321521
+
+@tasks.loop(minutes=30) 
+async def envoie_periodique():
+    async with httpx.AsyncClient() as cl:
+            r = await cl.get(API_URL + ROUTE_GOLDS)
+            data = r.json()                     # -> dict Python
+            prix = data["price_ounce_eur"]      # -> 3586.305 (float)
+            channel = client.get_channel(1439642469330321521)
+            await channel.send(f"Le prix de l'ounce est actuellement de : {prix}€, envoyé par l\'esclave d\'Al-Hashemi")
+    
 
 # ------------------------------------------------------------
 # TOKEN DU BOT DISCORD (A REMPLACER PAR TOI)
